@@ -3,5 +3,7 @@
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd" default-autowire="byName">
 
-    <bean id="messageService" class="com.springioc.code.MessageService"/>
+    <!--<bean id="messageService" class="com.springioc.code.MessageService"/>-->
+
+    <bean id="person" class="com.springioc.code.Person"></bean>
 </beans>

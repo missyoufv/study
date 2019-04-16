@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Persons>
+    <Person id="1">
+        <name>jack</name>
+        <age>18</age>
+        <sex>男</sex>
+    </Person>
+
+    <Person id="2">
+        <name>rose</name>
+        <age>20</age>
+        <sex>女</sex>
+    </Person>
+
+    <Person id="3">
+        <name>tom</name>
+        <age>28</age>
+        <sex>男</sex>
+    </Person>
+</Persons>

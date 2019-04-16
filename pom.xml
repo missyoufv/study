@@ -15,6 +15,18 @@
             <artifactId>spring-context</artifactId>
             <version>4.3.11.RELEASE</version>
         </dependency>
+        <!--jdom 解析xml-->
+        <dependency>
+            <groupId>org.jdom</groupId>
+            <artifactId>jdom2</artifactId>
+            <version>2.0.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>1.6.1</version>
+        </dependency>
 
         <!-- Netty -->
         <dependency>

@@ -1,3 +1,40 @@
 Spring核心IOC的源码分析
 
+AliasRegistry:提供别名注册的接口
+
+SimpleAliasRegistry
+
+SingletonBeanRegistry:提供单例bean注册的接口
+
+DefaultSingletonBeanRegistry
+
+FactoryBeanRegistrySupport:在DefaultSingletonBeanRegistry基础上增加了对FactoryBean 的特殊处理
+
+BeanDefinitionRegistry:定义对BeanDefinition的各种增删改查操作
+
+BeanFactory:定义了获取Bean及Bean的各种属性
+
+HierarchicalBeanFactory:继承BeanFactory,增加了对parentFactory 的支持
+
+ConfigurableBeanFactory：提供配置Factory的各种方法
+
+ListableBeanFactory：根据各种条件获取bean的配置清单
+
+AbstractBeanFactory:综合FactoryBeanRegistrySupport和ConfigurableBeanFactory的功能
+
+AutowireCapableBeanFactory:提供创建Bean、自动注入、初始化以及应用Bean的后续处理器
+
+AbstractAutowireCapableBeanFactory:综合AbstractBeanFactory并对AutowireCapableBeanFactory进行实现
+
+ConfigurableListableBeanFactory:BeanFactory的配置清单，指定忽略类型及接口等
+
+DefaultListableBeanFactory 是bean加载的核心部分，是spring注册及加载bean的默认实现。
+
+XmlBeanDefinitionReader：资源文件读取、解析、以及BeanDefinition的注册  --AbstractBeanDefinitionReader -- BeanDefinitionReader
+
+BeanNameGenerator -- DefaultBeanNameGenerator和AnnotationBeanNameGenerator。其中DefaultBeanNameGenerator是给资源文件加载bean时使用（BeanDefinitionReader中使用）；AnnotationBeanNameGenerator是为了处理注解生成bean name的情况。
+
+
+xml文件的正确性是由xml的验证模式来保证的,比较常见的验证模式有两种：DTD(document type definition 文档类型定义)和XSD （xml schemas definition）
+
 
