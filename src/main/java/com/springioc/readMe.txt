@@ -38,3 +38,11 @@ BeanNameGenerator -- DefaultBeanNameGenerator和AnnotationBeanNameGenerator。�
 xml文件的正确性是由xml的验证模式来保证的,比较常见的验证模式有两种：DTD(document type definition 文档类型定义)和XSD （xml schemas definition）
 
 
+BeanDefinition 接口
+
+AbstractBeanDefinition 抽象类
+
+RootBeanDefinition GenericBeanDefinition  ChildBeanDefinition  实现类
+
+
+

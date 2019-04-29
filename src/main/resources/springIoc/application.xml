@@ -5,5 +5,17 @@
 
     <!--<bean id="messageService" class="com.springioc.code.MessageService"/>-->
 
-    <bean id="person" class="com.springioc.code.Person"></bean>
+    <!--<bean id="person" class="com.springioc.bean.Person">-->
+        <!--<constructor-arg value="duwei"></constructor-arg>-->
+        <!--<constructor-arg ref="product"></constructor-arg>-->
+    <!--</bean>-->
+
+    <bean name="product" class="com.springioc.bean.Product">
+        <constructor-arg index="0" value="1"></constructor-arg>
+        <constructor-arg index="1" value="phone"></constructor-arg>
+    </bean>
+  <!--  <bean id="productFactory" class="com.springioc.bean.ProductFactory"></bean>-->
+
+    <!-- Spring后置处理器 -->
+    <bean id="postProcessor" class="com.springioc.code.PostProcessor"/>
 </beans>

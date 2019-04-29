@@ -1,5 +1,7 @@
 package com.springioc.code;
 
+import com.springioc.bean.Person;
+import com.springioc.bean.Product;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -36,7 +38,9 @@ public class SpringBootStrap {
 //        System.out.println(SpringBootStrap.class.getResource("/").getPath()); //获取的是classpath的根路径
 //        System.out.println(Thread.currentThread().getContextClassLoader().getResource("").getPath());//获取的是classpath的根路径。
         BeanFactory beanFactory = new XmlBeanFactory(new ClassPathResource("springIoc/application.xml"));
-        Person person  = (Person) beanFactory.getBean("person");
-        System.out.println(person.getName());
+//        Person person  = (Person) beanFactory.getBean("person");
+//        person.showInfo();
+        Product product = (Product) beanFactory.getBean("product");
+        System.out.println(product.getProductName());
     }
 }
