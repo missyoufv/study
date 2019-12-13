@@ -1,11 +1,12 @@
 package com.collection;
 
 import java.util.*;
+import java.util.concurrent.SynchronousQueue;
 
 public class LinkDemo {
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
         String []array = new String[]{"1","5","10"};
         List list = new LinkedList(Arrays.asList(array));
         list.add("15");
@@ -31,5 +32,9 @@ public class LinkDemo {
             Map.Entry<String, String> entry = it.next();
             System.out.println(entry.getKey() + " : " + entry.getValue());
         }
+
+        SynchronousQueue synchronousQueue = new SynchronousQueue();
+        boolean flag = synchronousQueue.offer("abc");
+        System.out.println(flag);
     }
 }

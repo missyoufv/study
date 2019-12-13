@@ -8,7 +8,7 @@ package com.pattern.prototype;
 class Realizetype implements Cloneable {
 
     private Integer age = 18;
-    private String name = "test";
+    private String name = "studyApi";
     private Object object = new Object();
 
     private int height = 80;

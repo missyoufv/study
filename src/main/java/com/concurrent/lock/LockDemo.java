@@ -35,10 +35,10 @@ public class LockDemo {
         if(i ==1){
             System.out.println(i);
         }else if((i=2)==3){
-            System.out.println("test 复制");
+            System.out.println("studyApi 复制");
             System.out.println(i);
         }else
-            System.out.println("test"+i);
+            System.out.println("studyApi"+i);
 
 
         ConcurrentLinkedQueue linkedQueue = new ConcurrentLinkedQueue();

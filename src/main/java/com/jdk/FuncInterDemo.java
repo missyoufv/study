@@ -20,5 +20,8 @@ public class FuncInterDemo {
         funcInter.printHello();
         FuncInter.write();
         System.out.println(funcInter.equals("12"));
+        System.out.println();
+
+        System.out.println();
     }
 }

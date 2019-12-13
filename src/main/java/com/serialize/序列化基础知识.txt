@@ -1,0 +1,150 @@
+八位二进制数为什么表示范围（-128~~+127）理解
+计算机对带符号数的表示有三种方法：原码、反码和补码。
+8位原码和反码能够表示数的范围是-127~127。
+8位补码能够表示数的范围是 -128~127。
+范围是-128~127，那肯定是用补码表示的。 10000000-11111111表示-128到-1， 00000000-01111111表示0-127 补码的1111 1111转换成原码就是1000 0001，也就是-1，补码就是二进制表示负数的一种方法。
+引入了补码概念：负数的补码就是对反码加一，而正数不变,正数的原码反码补码是一样的。在补码中用(-128)代替了(-0)，所以补码的表示范围为：(-128~0~127)共256个。
+注意:（-128)没有相对应的原码和反码，(-128) = (10000000)。
+所谓原码就是二进制定点表示法，即最高位为符号位，“0”表示正，“1”表示负，其余位表示数值的大小。
+反码表示法规定：正数的反码与其原码相同；负数的反码是对其原码逐位取反，但符号位除外。
+补码表示法规定：正数的补码与其原码相同；负数的补码是在其反码的末位加1。
+
+总结：
+
+已知一个数的补码，求原码的操作其实就是对该补码再求补码。
+补码转换为原码：符号位不变，数值位按位取反,末位再加1。即补码的补码等于原码。
+正整数的原码、反码和补码是一样的，即看到符号位（第一位）是0，就可以照着写出其他两种码。所以已知正数的补码，求其原码，两个数是一样的。
+
+
+补码的特性
+补码定义:正数的补码与原码相同；负数的补码是对其原码逐位取反，但符号位除外；然后整个数加1。
+https://blog.csdn.net/jiese1990/article/details/8209178
+
+有符号右移>>
+有符号右移就是右移之后，左边的补上符号位，正数补0，负数补1
+无符号右移>>>
+无符号右移就是右移之后，无论该数为正还是为负，右移之后左边都是补上0（补上0也就是负数的二进制无符号右移就变成了正数）
+左移<<
+左移不区分有符号和无符号，都是左移之后右边补上0，最左边的符号位也直接移走
+
+
+~运算：
+
+1.符号位不变，按位取反
+
+2.符号位为0（整数）：取反的结果-1，符号位为1（负数），取反结果+1
+
+3.包含符号位，按位取反
+
+~5=-6
+
+二进制：     00000101
+
+取反：         01111010
+
+-1：             01111001
+
+取反：         10000110=-6;
+
+~-7=+6
+
+二进制： 10000111
+
+取反：     11111000
+
++1：        11111001
+
+取反：     00000110=+6;
+
+
+对于正数来说  无符号右移和右移是一样的  而对于负数来说就不是了
+
+如果左移溢出：
+
+因为int是一个32位的二进制数，以下“：”右边的数值以二进制显示，可以看见，超出32位便会重回第一个数位。
+
+
+1.什么是序列化
+    我们把变量从内存中变成可存储或传输的过程称之为序列化
+
+2.为什么要序列化
+    根本原因：需要将变量或对象从内存中取出来进行存储或传输
+
+3.具体应用：
+    1)对象保存到文件或数据库
+    2)网络编程时对象跨平台跨语言传输，也即从windows上序列化的对象可到linux上返序列化，用c＃序列化的对象可以被java反序列化。
+
+4.序列化的形式：
+    1)二进制序列化器BinaryFormatter，主要将对象序列化成流的形式，用于数据存储
+    2)JSON序列化器，主要将对象序列化成字符串，用于数据传输
+
+5.主要区别：
+
+    1)二进制序列化器需要向需要序列化的类应用[Serializable]特性，而Json序列化器不需要
+    2)二进制序列化器只能序列化字段，而不能序列化属性，也就是说当一个类中不显示定义字段，二进制序列化器是不起作用的，
+        JSON序列化器没有这条规定。在二进制序列化器中，若某个字段不需要序列化，可向其应用[NonSerialized]特性，以节省网络传输的带宽以及减少序列化后文件大小
+    3)二进制序列化后得到的是一个二进制文件，而JSON序列化后得到的是JSON字符串。
+
+6.JSON有三种形式，分别是：
+
+    a.对象
+     一个没有顺序的“键/值”,一个对象以花括号“{”开始，并以花括号"}"结束
+     在每一个“键”的后面，有一个冒号，并且使用逗号来分隔多个键值对。
+        var user = {"name":"Acettest","gender":"Male","birthday":"1987-8-8"}
+
+  b.数组
+
+     设置值的顺序，一个数组以中括号”["开始,并以中括号"]"结束，并且所有的值使用逗号分隔.
+        var userlist = [{"user":{"name":"Acettest","gender":"Male","birthday":"1987-8-8"}},
+                  {"user":{"name":"msheng","Male":"Female","birthday":"1987-7-7"}}]
+
+   c.字符串
+
+     任意数量的Unicode字符，使用引号做标记，并使用反斜杠来分隔。
+      (注意: 引号  逗号  冒号  均为英文状态下半角符号, 且只能是双引号 )
+        var userlist = "{\"ID\":1,\"Name\":\"Manas\",\"Address\":\"India\"}"
+7.使用：
+
+1)二进制序列化
+
+a.二进制序列化器
+
+Book.cs
+    [Serializable]
+    internal class Book
+    {
+        private string name;
+        public string Name { get { return name; } }
+        private double price;
+        public double Price { get { return price; } }
+
+        [NonSerialized]
+        private string iSON;
+
+        public string ISON { get { return iSON; } }
+
+        public Book(string bookname, double bookprice, string bookison)
+        {
+            name = bookname;
+            price = bookprice;
+            iSON = bookison;
+        }
+    }
+
+//序列化
+            Book book = new Book("Harry Potter", 25.23, "49384759i4034385u9");
+            string path = AppDomain.CurrentDomain.BaseDirectory +Path.DirectorySeparatorChar+ @"app.dat";
+            using (FileStream fs = new FileStream(path, FileMode.Create))
+            {
+                BinaryFormatter bf = new BinaryFormatter();
+                bf.Serialize(fs, book);
+            }
+
+            //反序列化
+            book = null;
+            using (FileStream fs = new FileStream(path, FileMode.Open))
+            {
+                BinaryFormatter bf = new BinaryFormatter();
+                var specialbook = (Book)bf.Deserialize(fs);
+                Console.WriteLine(specialbook.Name + specialbook.Price + specialbook.ISON);
+            }

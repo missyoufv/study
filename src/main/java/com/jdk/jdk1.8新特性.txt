@@ -1,0 +1,45 @@
+1.在jdk1.8中对hashMap等map集合的数据结构优化。hashMap数据结构的优化
+    原来的hashMap采用的数据结构是哈希表（数组+链表），hashMap默认大小是16，一个0-15索引的数组，如何往里面存储元素，首先调用元素的hashcode
+    方法，计算出哈希码值，经过哈希算法算成数组的索引值，如果对应的索引处没有元素，直接存放，如果有对象在，那么比较它们的equals方法比较内容
+    如果内容一样，后一个value会将前一个value的值覆盖，如果不一样，在1.7的时候，后加的放在前面，形成一个链表，形成了碰撞，在某些情况下如果链表
+    无限下去，那么效率极低，碰撞是避免不了的
+    加载因子：0.75，数组扩容，达到总容量的75%，就进行扩容，但是无法避免碰撞的情况发生
+    在1.8之后，在数组+链表+红黑树来实现hashmap，当碰撞的元素个数大于8时 & 总容量大于64，会有红黑树的引入
+    除了添加之后，效率都比链表高，1.8之后链表新进元素加到末尾
+    ConcurrentHashMap (锁分段机制)，concurrentLevel,jdk1.8采用CAS算法(无锁算法，不再使用锁分段)，数组+链表中也引入了红黑树的使用
+
+2.Lambda表达式 需要 “函数式接口” 的支持
+    lambda表达式本质上是一段匿名内部类，也可以是一段可以传递的代码
+         *  表达式语法
+         *  表达式可使用的变量
+         *  表达式中的this概念
+
+3.方法引用（Method reference）和构造器引用（construct reference）
+    方法引用语法格式有以下几种：
+      *         objectName::instanceMethod  引用静态方法
+      *         ClassName::staticMethod  引用特定对象的实例方法
+      *         ClassName::instanceMethod 引用构造函数
+      *         ContainingType::methodName 引用特定类型的任意对象的实例方法
+
+      java8 内置的四大核心函数式接口
+        第一种：Consumer<T>:消费型接口
+              void accept(T t);
+        第二种：Supplier<T>:供给型接口
+              T get();
+        第三种：Function<T,R>:函数型接口
+              R apply(T t);
+         第三种：Predicate<T>:断定型接口
+                 boolean test(T t)
+
+4.Stream API
+
+    首先对stream的操作可以分为两类，中间操作(intermediate operations)和结束操作(terminal operations):
+
+    中间操作总是会惰式执行，调用中间操作只会生成一个标记了该操作的新stream。
+    结束操作会触发实际计算，计算发生时会把所有中间操作积攒的操作以pipeline的方式执行，这样可以减少迭代次数。计算完成之后stream就会失效。
+    虽然大部分情况下stream是容器调用Collection.stream()方法得到的，但stream和collections有以下不同：
+
+    无存储。stream不是一种数据结构，它只是某种数据源的一个视图，数据源可以是一个数组，Java容器或I/O channel等。
+    为函数式编程而生。对stream的任何修改都不会修改背后的数据源，比如对stream执行过滤操作并不会删除被过滤的元素，而是会产生一个不包含被过滤元素的新stream。
+    惰式执行。stream上的操作并不会立即执行，只有等到用户真正需要结果的时候才会执行。
+

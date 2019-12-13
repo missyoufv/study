@@ -32,6 +32,7 @@ public class LambdaDemo {
         List<Integer> numList = Arrays.asList(10,5,2,3,6);
         //创建匿名内部类
         Collections.sort(numList,(a,b)->a-b);
+        Collections.sort(numList, Comparator.comparingInt(a -> a));
         System.out.println(numList);
 
         List<Integer> numList1 = Arrays.asList(10,5,2,3,6);
@@ -63,7 +64,7 @@ public class LambdaDemo {
          *   return statmentM;
          * }
          */
-        List<String> upCaseList = list.stream().map(name->{return name.toUpperCase();}).collect(Collectors.toList());
+        List<String> upCaseList = list.stream().map(name-> name.toUpperCase()).collect(Collectors.toList());
         System.out.println(upCaseList);
 
         /**

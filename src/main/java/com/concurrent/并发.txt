@@ -1,0 +1,171 @@
+一、JAVA 线程实现/创建 创建方式 方式
+
+    1、继承Thread类
+    2、实现Runnable 接口
+    3、有返回值线程 线程有返回值的任务必须实现 Callable 接口，类似的，无返回值的任务必须 Runnable 接口。执行Callable 任务后，可以获取一个 Future 的对象，在该对象上调用
+       get 就可以获取到 Callable 任务返回的 Object 了，再结合线程池接口 ExecutorService 就可以实现传说中有返回结果的多线程了。
+
+二、4种线程池
+    Java 里面线程池的顶级接口是 Executor，但是严格意义上讲 Executor 并不是一个线程池，而只是一个执行线程的工具。真正的线程池接口是 ExecutorService。
+
+    Executors创建返回ThreadPoolExecutor对象
+
+        newCachedThreadPool : 创建可缓存的线程池
+            是一个根据需要创建新线程的线程池
+                corePoolSize => 0，核心线程池的数量为0
+                maximumPoolSize => Integer.MAX_VALUE，线程池最大数量为Integer.MAX_VALUE，可以认为可以无限创建线程
+                keepAliveTime => 60L
+                unit => 秒
+                workQueue => SynchronousQueue
+
+            当一个任务提交时，corePoolSize为0不创建核心线程，SynchronousQueue是一个不存储元素的队列，可以理解为队里永远是满的，因此最终会创建非核心线程来执行任务。
+            对于非核心线程空闲60s时将被回收。因为Integer.MAX_VALUE非常大，可以认为是可以无限创建线程的，在资源有限的情况下容易引起OOM异常
+
+
+        newSingleThreadExecutor ： 创建单线程的线程池
+            是单线程线程池，只有一个核心线程
+                corePoolSize => 1，核心线程池的数量为1
+                maximumPoolSize => 1，线程池最大数量为1，即最多只可以创建一个线程，唯一的线程就是核心线程
+                keepAliveTime => 0L
+                unit => 毫秒
+                workQueue => LinkedBlockingQueue
+
+            当一个任务提交时，首先会创建一个核心线程来执行任务，如果超过核心线程的数量，将会放入队列中，因为LinkedBlockingQueue是长度为Integer.MAX_VALUE的队列，
+            可以认为是无界队列，因此往队列中可以插入无限多的任务，在资源有限的时候容易引起OOM异常，同时因为无界队列，maximumPoolSize和keepAliveTime参数将无效，
+            压根就不会创建非核心线程
+
+
+
+        newFixedThreadPool ：创建固定长度的线程池
+            是固定核心线程的线程池，固定核心线程数由用户传入
+
+                corePoolSize => nThreads，核心线程池的数量为1
+                maximumPoolSize => nThreads，线程池最大数量为nThreads，即最多只可以创建nThreads个线程
+                keepAliveTime => 0L
+                unit => 毫秒
+                workQueue => LinkedBlockingQueue
+
+            它和SingleThreadExecutor类似，唯一的区别就是核心线程数不同，并且由于使用的是LinkedBlockingQueue，在资源有限的时候容易引起OOM异常
+
+
+        总结：
+
+        FixedThreadPool和SingleThreadExecutor => 允许的请求队列长度为Integer.MAX_VALUE，可能会堆积大量的请求，从而引起OOM异常
+        CachedThreadPool => 允许创建的线程数为Integer.MAX_VALUE，可能会创建大量的线程，从而引起OOM异常
+
+        如何定义线程池参数：
+
+        CPU密集型 => 线程池的大小推荐为CPU数量 + 1，CPU数量可以根据Runtime.availableProcessors方法获取
+        IO密集型 => CPU数量 * CPU利用率 * (1 + 线程等待时间/线程CPU时间)
+        混合型 => 将任务分为CPU密集型和IO密集型，然后分别使用不同的线程池去处理，从而使每个线程池可以根据各自的工作负载来调整
+        阻塞队列 => 推荐使用有界队列，有界队列有助于避免资源耗尽的情况发生
+        拒绝策略 => 默认采用的是AbortPolicy拒绝策略，直接在程序中抛出RejectedExecutionException异常【因为是运行时异常，不强制catch】，这种处理方式不够优雅。处理拒绝策略有以下几种比较推荐：
+
+                    在程序中捕获RejectedExecutionException异常，在捕获异常中对任务进行处理。针对默认拒绝策略
+                    使用CallerRunsPolicy拒绝策略，该策略会将任务交给调用execute的线程执行【一般为主线程】，此时主线程将在一段时间内不能提交任何任务，从而使工作线程处理正在执行的任务。此时提交的线程将被保存在TCP队列中，TCP队列满将会影响客户端，这是一种平缓的性能降低
+                    自定义拒绝策略，只需要实现RejectedExecutionHandler接口即可
+                    如果任务不是特别重要，使用DiscardPolicy和DiscardOldestPolicy拒绝策略将任务丢弃也是可以的
+
+        如果使用Executors的静态方法创建ThreadPoolExecutor对象，可以通过使用Semaphore对任务的执行进行限流也可以避免出现OOM异常
+
+
+三、线程生命周期
+
+    当线程被创建并启动以后，它既不是一启动就进入了执行状态，也不是一直处于执行状态。在线程的生命周期中，它要经过新建(New)、就绪（Runnable）、运行（Running）、阻塞
+    (Blocked)和死亡(Dead)5 种状态。尤其是当线程启动以后，它不可能一直"霸占"着 CPU 独自运行，所以 CPU 需要在多条线程之间切换，于是线程状态也会多次在运行、阻塞之间切换
+
+    新建状态（NEW ）
+        当程序使用 new 关键字创建了一个线程之后，该线程就处于新建状态，此时仅由 JVM 为其分配内存，并初始化其成员变量的值
+
+    就绪状态（RUNNABLE ）
+        当线程对象调用了 start()方法之后，该线程处于就绪状态。Java 虚拟机会为其创建方法调用栈和程序计数器，等待调度运行。
+
+    运行状 态（RUNNING ）
+        如果处于就绪状态的线程获得了 CPU，开始执行 run()方法的线程执行体，则该线程处于运行状态。
+
+    阻塞状态（BLOCKED）
+        阻塞状态是指线程因为某种原因放弃了cpu 使用权，也即让出了 cpu timeslice，暂时停止运行。直到线程进入可运行(runnable)状态，才有机会再次获得 cpu timeslice 转到运行(running)状
+        态。阻塞的情况分三种：
+
+            等待阻塞 （ o.wait-> 等待对列 ）
+                运行(running)的线程执行 o.wait()方法，JVM 会把该线程放入等待队列(waitting queue)中。
+
+            同步阻塞 (lock-> 锁池 )
+                运行(running)的线程在获取对象的同步锁时，若该同步锁被别的线程占用，则JVM 会把该线程放入锁池(lock pool)中。
+
+            其他阻塞 (sleep/join)
+                运行(running)的线程执行 Thread.sleep(long ms)或 t.join()方法，或者发出了 I/O 请求时，VM 会把该线程置为阻塞状态。
+                当 sleep()状态超时、join()等待线程终止或者超时、或者 I/O处理完毕时，线程重新转入可运行(runnable)状态。
+
+    线程死亡（DEAD ）
+
+        线程会以下面三种方式结束，结束后就是死亡状态
+
+            正常结束
+                run()或 call()方法执行完成，线程正常结束
+
+            异常结束
+                线程抛出一个未捕获的 Exception 或 Error
+
+            调用stop
+                直接调用该线程的 stop()方法来结束该线程—该方法通常容易导致死锁，不推荐使用。
+
+
+        终止线程4种方式
+
+            1、正常运行结束
+            2、使用退出标志退出线程
+                一般 run()方法执行完，线程就会正常结束，然而，常常有些线程是伺服线程。它们需要长时间的运行，只有在外部某些条件满足的情况下，才能关闭这些线程。
+                使用一个变量来控制循环，例如：最直接的方法就是设一个boolean 类型的标志，并通过设置这个标志为 true或 false 来控制 while循环是否退出
+            3、使用interrupt()方法来中断线程有两种情况
+
+                1. 线程处于阻塞状态：如使用了 sleep,同步锁的 wait,socket 中的 receiver,accept 等方法时，会使线程处于阻塞状态。当调用线程的 interrupt()方法时，
+                会抛出 InterruptException 异常。阻塞中的那个方法抛出这个异常，通过代码捕获该异常，然后 break 跳出循环状态，从而让我们有机会结束这个线程的执行。
+                通常很多人认为只要调用 interrupt 方法线程就会结束，实际上是错的， 一定要先捕获 InterruptedException 异常之后通过 break 来跳出循环，才能正
+                常结束 run 方法。
+                2.. 线程未处于阻塞状态：使用 isInterrupted()判断线程的中断标志来退出循环。当使用interrupt()方法时，中断标志就会置 true，
+                和使用自定义的标志来控制循环是一样的道理。
+
+
+        stop 方法终止线程（线程不安全）
+
+            程序中可以直接使用 thread.stop()来强行终止线程，但是 stop 方法是很危险的，就象突然关
+            闭计算机电源，而不是按正常程序关机一样，可能会产生不可预料的结果，不安全主要是：
+            thread.stop()调用之后，创建子线程的线程就会抛出 ThreadDeatherror 的错误，并且会释放子
+            线程所持有的所有锁。一般任何进行加锁的代码块，都是为了保护数据的一致性，如果在调用
+            thread.stop()后导致了该线程所持有的所有锁的突然释放(不可控制)，那么被保护数据就有可能呈
+            现不一致性，其他线程在使用这些被破坏的数据时，有可能导致一些很奇怪的应用程序错误。因
+            此，并不推荐使用 stop 方法来终止线程。
+
+    sleep 与 wait 区别
+        1. 对于 sleep()方法，我们首先要知道该方法是属于 Thread 类中的。而 wait()方法，则是属于Object 类中的。
+        2. sleep()方法导致了程序暂停执行指定的时间，让出 cpu 该其他线程，但是他的监控状态依然保持者，当指定的时间到了又会自动恢复运行状态。
+        3. 在调用 sleep()方法的过程中，线程不会释放对象锁。
+        4. 而当调用 wait()方法的时候，线程会放弃对象锁，进入等待此对象的等待锁定池，只有针对此对象调用 notify()方法后本线程才进入对象锁定池准备获取对象锁进入运行状态。
+
+    start 与 与 run 区别
+        1. start（）方法来启动线程，真正实现了多线程运行。这时无需等待 run 方法体代码执行完毕，可以直接继续执行下面的代码。
+        2. 通过调用 Thread 类的 start()方法来启动一个线程， 这时此线程是处于就绪状态， 并没有运行。
+        3. 方法 run()称为线程体，它包含了要执行的这个线程的内容，线程就进入了运行状态，开始运行 run 函数当中的代码。 Run 方法运行结束， 此线程终止。然后 CPU 再调度其它线程。
+
+
+    JAVA 后台线程
+
+        1. 定义：守护线程--也称“服务线程”，他是后台线程，它有一个特性，即为用户线程提供公共服务，在没有用户线程可服务时会自动离开。
+        2. 优先级：守护线程的优先级比较低，用于为系统中的其它对象和线程提供服务。
+        3. 设置：通过 setDaemon(true)来设置线程为“守护线程”；将一个用户线程设置为守护线程的方式是在 线程对象创建 之前 用线程对象的 setDaemon 方法。
+        4. 在 Daemon 线程中产生的新线程也是 Daemon 的。
+        5. 线程则是 JVM 级别的，以 Tomcat 为例，如果你在 Web 应用中启动一个线程，这个线程的生命周期并不会和 Web 应用程序保持同步。也就是说，即使你停止了 Web 应用，
+           这个线程依旧是活跃的。
+        6. example: 垃圾回收线程就是一个经典的守护线程，当我们的程序中不再有任何运行的Thread,程序就不会再产生垃圾，垃圾回收器也就无事可做，所以当垃圾回收线程是 JVM 上仅剩的线
+           程时，垃圾回收线程会自动离开。它始终在低级别的状态中运行，用于实时监控和管理系统中的可回收资源。
+        7. 生命周期：守护进程（Daemon）是运行在后台的一种特殊进程。它独立于控制终端并且周期性地执行某种任务或等待处理某些发生的事件。也就是说守护线程不依赖于终端，但是依
+           赖于系统，与系统“同生共死”。当 JVM 中所有的线程都是守护线程的时候，JVM 就可以退出了；如果还有一个或以上的非守护线程则 JVM 不会退出。
+
+
+
+
+
+
+
+

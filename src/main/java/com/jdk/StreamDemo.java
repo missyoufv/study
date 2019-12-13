@@ -1,36 +1,92 @@
 package com.jdk;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
- * jdk1.8 stream
- *
- * 两句话理解Stream：
- *
- * 1.Stream是元素的集合，这点让Stream看起来用些类似Iterator；
- * 2.可以支持顺序和并行的对原Stream进行汇聚的操作；
- *
- * 大家可以把Stream当成一个装饰后的Iterator。原始版本的Iterator，用户只能逐个遍历元素并对其执行某些操作；包装后的Stream，
- * 用户只要给出需要对其包含的元素执行什么操作，比如“过滤掉长度大于10的字符串”、“获取每个字符串的首字母”等，具体这些操作
- * 如何应用到每个元素上，就给Stream就好了！原先是人告诉计算机一步一步怎么做，现在是告诉计算机做什么，计算机自己决定怎么做。
- * 当然这个“怎么做”还是比较弱的。
- *
- * 参考 https://www.cnblogs.com/aoeiuv/p/5911692.html
+ * 1、获取stream方法
+ * 2、stream方法使用
  */
 public class StreamDemo {
+
     public static void main(String[] args) {
 
+        getStream();
+        invokeStreamMethod();
+    }
+
+    /**
+     * stream 方法使用
+     */
+    private static void invokeStreamMethod() {
+
+        List<Integer> list = new ArrayList<>();
+        list.add(1);
+        list.add(9);
+        list.add(3);
+
+        // 迭代
+        list.forEach(System.out::print);
+        list.stream().forEach(i-> System.out.print(i + " "));
+        System.out.println();
+        // 小到大排序  Comparator.thenComparing 首先使用xx排序，紧接着在使用xxx排序，来看下使用效果 Comparator.reversed 进行大到小排序
         /**
-         * 使用Stream的基本步骤：
-         *
-         * 1.创建Stream；
-         * 2.转换Stream，每次转换原有Stream对象不改变，返回一个新的Stream对象（**可以有多次转换**）；
-         * 3.对Stream进行聚合（Reduce）操作(如下 collect(Collectors.toList()))，获取想要的结果；
+         *  Collections.sort(employees, Comparator.comparing(Employee::getAge).thenComparing(Employee::getName));
          */
-        List<String> list = Arrays.asList("abc","efgs","aefsft","cab");
-        List<String> filterList = list.stream().filter(param -> param.length() < 4).collect(Collectors.toList());
-        filterList.forEach(System.out::println);
+        list.stream().sorted(Comparator.comparingInt(a -> (int) a).reversed()).forEach(i -> System.out.print(i + " "));
+        // 普通lambda排序
+        list.sort((a,b)->a-b);
+        System.out.println("lambda 排序结果"+list);
+
+        /**
+         * 过滤操作
+         */
+        System.out.println("过滤操作"+list.stream().filter(i->i>2).collect(Collectors.toList()));
+
+        /**
+         * 截断操作
+         */
+        System.out.println("截断操作"+ list.stream().limit(2).collect(Collectors.toList()));
+
+        /**
+         * skip()：与limit互斥，使用该方法跳过元素
+         */
+        System.out.println("跳过操作"+ list.stream().skip(2).collect(Collectors.toList()));
+
+        /**
+         * distinct()：使用该方法去重，注意：必须重写对应泛型的hashCode()和equals()方法
+         */
+        list.add(3);
+        System.out.println("重复元素结合"+list);
+        System.out.println("去重操作"+list.stream().distinct().collect(Collectors.toList()));
+        /**
+         * findFirst() ：使用该方法获取第一个元素
+         */
+        System.out.println("获取第一个元素操作"+list.stream().filter(i->i==3).findFirst().get());
+
+        /**
+         * map()：接收一个方法作为参数，该函数会被应用到每个元素上，并将其映射成一个新的元素
+         */
+        System.out.println("map对每个元素的操作"+ list.stream().map(i->i+4).collect(Collectors.toList()));
+    }
+
+    /**
+     * 获取stream的几种方法
+     */
+    private static void getStream() {
+        // 值
+        Stream<String> st1 = Stream.of("a","b","c");
+
+        // 集合
+        List<String> list = Arrays.asList("ab", "cd", "ef");
+        Stream<String> st2 = list.stream();
+
+        // 数组
+        String [] arr = new String[]{"a","b","c"};
+        Stream<String> str3 = Arrays.stream(arr);
     }
 }

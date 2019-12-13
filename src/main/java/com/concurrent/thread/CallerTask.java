@@ -1,4 +1,4 @@
-package com.concurrent;
+package com.concurrent.thread;
 
 import java.util.concurrent.*;
 
@@ -17,7 +17,9 @@ public class CallerTask implements Callable<String> {
         //创建异步任务
         FutureTask<String> futureTask = new FutureTask<>(new CallerTask());
         //启动线程
-//        pool.execute(futureTask);
+        pool.submit(futureTask);
+
+        CompletableFuture<String> completableFuture = new CompletableFuture<String>();
         try{
             if(futureTask.isDone()){
                 String result = futureTask.get();
@@ -55,7 +57,7 @@ public class CallerTask implements Callable<String> {
             String [] temp = test.split("_2",2);
             System.out.println(temp[0]+":"+temp[1]);
             if(true){
-                System.out.println("test return ");
+                System.out.println("studyApi return ");
                 return;
             }
         }catch (Exception ex){

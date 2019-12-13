@@ -1,5 +1,10 @@
 package com.jdk;
 
+/**
+ * 接口中只有一个抽象方法的接口，称为函数式接口，可以通过 Lambda 表达式来创建该接口的对象 (若 Lambda表达式抛出一个受检异常，
+ * 那么该异常需要在目标接口的抽象方法上进行声明) 可以使用注解 @FunctionalInterface 修饰可以检查是否是函数式接口，
+ * 同时 javadoc 也会包含一条声明，说明这个接口是一个函数式接口
+ */
 @FunctionalInterface
 public interface FuncInter {
 
@@ -16,7 +21,4 @@ public interface FuncInter {
     static void write(){
         System.out.println("good good study day day up");
     }
-
-    @Override
-    boolean equals(Object obj);
 }
