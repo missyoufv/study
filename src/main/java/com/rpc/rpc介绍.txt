@@ -24,7 +24,7 @@ RPC介绍
 
 三、常见RCP框架 原理及性能比较
 
-    RMI(原文链接：https://blog.csdn.net/qq_28081453/article/details/83279066)
+    RMI
 
     RMI由3个部分构成，第一个是rmiregistry（JDK提供的一个可以独立运行的程序，在bin目录下），第二个是server端的程序，对外提供远程对象，第三个是client端的程序，想要调用远程对象的方法。
     首先，先启动rmiregistry服务，启动时可以指定服务监听的端口，也可以使用默认的端口（1099）。

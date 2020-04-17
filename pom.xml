@@ -107,6 +107,14 @@
             <optional>true</optional>
             <version>1.18.8</version>
         </dependency>
+
+        <!--cglib 代理所需包-->
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib-nodep</artifactId>
+            <version>3.2.4</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

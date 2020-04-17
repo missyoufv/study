@@ -11,7 +11,7 @@ import java.util.concurrent.locks.Lock;
  * @Date: 2019/12/12 17:10
  * @Description:  extends jdk lock
  */
-public abstract class RedisLock implements Lock {
+public class RedisLock implements Lock {
 
     /**
      * redis connection object
@@ -57,6 +57,36 @@ public abstract class RedisLock implements Lock {
     protected void scheduleExpirationRenewal(){
         Thread renewalThread = new Thread(new ExpirationRenewal());
         renewalThread.start();
+    }
+
+    @Override
+    public void lock() {
+
+    }
+
+    @Override
+    public void lockInterruptibly() throws InterruptedException {
+
+    }
+
+    @Override
+    public boolean tryLock() {
+        return false;
+    }
+
+    @Override
+    public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+        return false;
+    }
+
+    @Override
+    public void unlock() {
+
+    }
+
+    @Override
+    public Condition newCondition() {
+        return null;
     }
 
     /**
