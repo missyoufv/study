@@ -1,0 +1,39 @@
+众所周知，在sql 中，join /in /exists 都可以用来实现，“查询A表中在（或者不在）B表中的记录”，这种查询，在查询的两个表大小相当的情况下，3种查询方式的执行时间通常是：
+
+    exists <= in <= join
+
+当表中字段允许NULL时，not in 的方式最慢；
+
+    not exists <= left join <= not in
+
+JOIN 和 IN
+    select * from A where id in(select id from B)
+    select * from A left join B on A.id = B.id
+
+使用join也可以实现这种功能（“查询A表中在（或者不在）B表中的记录”），但是往往吃力不讨好，因为还需要处理NULL，JOIN的使用场景是连接两个表，
+    而不是判断一个表的记录是否在另一个表中
+
+in 和 exists
+    select * from A where id in(select id from B)
+
+    但是，通常情况下，两个表中数据是一个较大，一个较小，这种情况下，
+    in适合子查询表B 数据小的情况；
+    exists适合子查询表B 数据大的情况
+
+    原因：in在查询的时候，先查子查询的表B，然后将内表和外表做一个笛卡尔积，然后按照条件筛选，所以子查询表比较小的时候，in的速度较快；
+    而exists 是对外表A做loop循环，每次loop循环再对内表B进行查询，即我们先查询的不是子查询B的内容，而是查我们的主查询的表A，所以子查询表数据比较大的时候，exists的速度较快
+
+not in 和 not exists
+    select * from A where id not in(select id from B)
+
+    无论哪个表大，not exists 总是比 not in 执行效率高
+
+    原因：not in没有用到索引，同时，内外表都要进行全表扫描；
+    而 exists的子查询依然可以使用索引。
+
+
+
+    Nested Loop Join （NLJ）算法 和 Block Nested Loop Join （BNLJ）算法
+
+
+
