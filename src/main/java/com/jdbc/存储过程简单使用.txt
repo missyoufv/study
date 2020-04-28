@@ -1,0 +1,179 @@
+create PROCEDURE demo_in_parameter(IN p_int int)
+BEGIN
+	select p_int;
+	SET p_int = 2;
+	select p_int;
+END
+
+
+create PROCEDURE demo_out_parameter(OUT p_out int)
+BEGIN
+	SELECT p_out;
+	SET p_out = 10;
+	select p_out;
+END
+
+set @p_int =1;
+CALL demo_in_parameter(@p_int);
+
+set @p_out = 2;
+CALL demo_out_parameter(@p_out);
+
+create PROCEDURE demo_inout_parameter(INOUT p_inout int)
+BEGIN
+	SELECT p_inout;
+	SET p_inout = 3;
+	SELECT p_inout;
+END
+
+
+set @p_inout = 5;
+SELECT @p_inout;
+CALL demo_inout_parameter(@p_inout);
+
+set @test = 'say hello';
+select @test;
+
+select 'hello world' into @x;
+select @x;
+
+
+CREATE PROCEDURE GreetWorld( ) SELECT CONCAT(@greeting,' World');
+
+set @greeting = 'hello';
+CALL GreetWorld();
+
+select name from mysql.proc where db = 'test';
+
+
+
+create PROCEDURE proc3()
+BEGIN
+	DECLARE x1 varchar(5) default 'outer';
+	BEGIN
+		DECLARE x1 varchar(5) default 'inner';
+		select x1;
+	END;
+	select x1;
+END;
+
+CALL proc3();
+
+
+
+create PROCEDURE proc2(in pramater int)
+BEGIN
+	declare l_int int;
+	set l_int = pramater +1;
+	if l_int = 0 THEN
+		select l_int;
+	end if;
+	if pramater = 0 THEN
+		set l_int = l_int *5;
+		select l_int;
+	ELSE
+		select l_int;
+	end if;
+END;
+
+set @pramater = 2;
+call proc2(@pramater);
+
+create PROCEDURE proc1()
+BEGIN
+	declare l_int int;
+	declare l_sum int;
+	set l_int = 1;
+	set l_sum = 0;
+	while(l_int <10) DO
+		set l_sum = l_int + l_sum;
+		set l_int = l_int + 1;
+	end WHILE;
+	select l_sum;
+END;
+
+call proc1();
+
+create PROCEDURE proc4()
+BEGIN
+	declare l_int int;
+	declare l_sum int;
+	set l_int = 0;
+	set l_sum =0;
+	REPEAT
+		set l_sum = l_sum + l_int;
+		set l_int = l_int +1;
+	UNTIL l_int >10
+	end REPEAT;
+	select l_sum;
+END;
+
+CALL proc4();
+
+create PROCEDURE proc5(in param int)
+BEGIN
+	declare l_int int;
+	set l_int = param +1;
+	CASE param
+		when 0 THEN
+			select l_int;
+		when 1 THEN
+			set l_int = l_int +5;
+		ELSE
+			set l_int = l_int +100;
+	END CASE;
+	select l_int;
+END;
+
+CALL proc5(1);
+
+
+
+
+-- mysql 自定义函数的使用
+-- 先查看函数功能是否开启：
+show variables like '%func%';
+-- 若是未开启则：
+SET GLOBAL log_bin_trust_function_creators=1;
+-- 关闭则是：
+SET GLOBAL log_bin_trust_function_creators=0;
+
+
+-- 随机生成一个指定长度的字符串
+create function rand_string(n int) returns varchar(255)
+begin
+ # 定义三个变量
+ declare chars_str varchar(100) default 'abcdefghijklmnopqrstuvwxyzABCDEFJHIJKLMNOPQRSTUVWXYZ';
+ declare return_str varchar(255) default '';
+ declare i int default 0;
+ while i < n do
+	set return_str = concat(return_str, substring(chars_str, floor(1+rand()*52), 1));
+	set i = i + 1;
+ end while;
+ return return_str;
+end
+
+
+-- 创建插入的存储过程
+create procedure insert_user(in start int(10), in max_num int(10))
+begin
+    declare i int default 0;
+		set autocommit = 0;
+		repeat
+			set i = i + 1;
+			insert into tbl_user_no_part values ((start+i) ,rand_string(8), concat(rand_string(6), '@random.com'), 1+FLOOR(RAND()*100), 3, now());
+		until i = max_num
+		end repeat;
+	 commit;
+end
+
+call insert_user(100000,500000);
+
+600w条数据，单标查询，无索引耗时2.5s （电脑性能：4核8g） 用索引0.01s
+
+
+
+
+
+
+

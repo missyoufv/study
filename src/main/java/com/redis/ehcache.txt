@@ -1,0 +1,112 @@
+1. 基本介绍
+EhCache 是一个纯Java的进程内缓存框架，具有快速、精干等特点，是Hibernate中默认CacheProvider。Ehcache是一种广泛使用的开源Java分布式缓存。
+主要面向通用缓存,Java EE和轻量级容器。它具有内存和磁盘存储，缓存加载器,缓存扩展,缓存异常处理程序,一个gzip缓存servlet过滤器,支持REST和SOAP api等特点。
+
+
+2. 主要的特性有：
+快速
+简单
+多种缓存策略
+缓存数据有两级：内存和磁盘，因此无需担心容量问题
+缓存数据会在虚拟机重启的过程中写入磁盘
+可以通过RMI、可插入API等方式进行分布式缓存
+具有缓存和缓存管理器的侦听接口
+支持多缓存管理器实例，以及一个实例的多个缓存区域
+提供Hibernate的缓存实现
+
+3. 集成
+可以单独使用，一般在第三方库中被用到的比较多（如mybatis、shiro等）ehcache 对分布式支持不够好，多个节点不能同步，通常和redis一块使用
+
+4. ehcache 和 redis 比较
+ehcache直接在jvm虚拟机中缓存，速度快，效率高；但是缓存共享麻烦，集群分布式应用不方便。
+
+redis是通过socket访问到缓存服务，效率比ecache低，比数据库要快很多，
+处理集群和分布式缓存方便，有成熟的方案。如果是单个应用或者对缓存访问要求很高的应用，用ehcache。如果是大型系统，存在缓存共享、分布式部署、缓存内容很大的，建议用redis。
+
+
+5、缓存配置(xml配置方式)
+    如下：
+    <!-- 磁盘缓存位置 -->
+    <diskStore path="java.io.tmpdir/ehcache"/>
+
+    <!-- 默认缓存 -->
+      <defaultCache
+              maxEntriesLocalHeap="10000"
+              eternal="false"
+              timeToIdleSeconds="120"
+              timeToLiveSeconds="120"
+              maxEntriesLocalDisk="10000000"
+              diskExpiryThreadIntervalSeconds="120"
+              memoryStoreEvictionPolicy="LRU">
+        <persistence strategy="localTempSwap"/>
+      </defaultCache>
+
+     <!-- helloworld缓存 -->
+      <cache name="HelloWorldCache"
+             maxElementsInMemory="1000"
+             eternal="false"
+             timeToIdleSeconds="5"
+             timeToLiveSeconds="5"
+             overflowToDisk="false"
+             memoryStoreEvictionPolicy="LRU"/>
+
+
+    cache ：自定的缓存，当自定的配置不满足实际情况时可以通过自定义（可以包含多个cache节点）
+
+    name : 缓存的名称，可以通过指定名称获取指定的某个Cache对象
+
+    maxElementsInMemory ：内存中允许存储的最大的元素个数，0代表无限个
+
+    clearOnFlush：内存数量最大时是否清除。
+
+    eternal ：设置缓存中对象是否为永久的，如果是，超时设置将被忽略，对象从不过期。根据存储数据的不同，例如一些静态不变的数据如省市区等可以设置为永不过时
+
+    timeToIdleSeconds ： 设置对象在失效前的允许闲置时间（单位：秒）。仅当eternal=false对象不是永久有效时使用，可选属性，默认值是0，也就是可闲置时间无穷大。
+
+    timeToLiveSeconds ：缓存数据的生存时间（TTL），也就是一个元素从构建到消亡的最大时间间隔值，这只能在元素不是永久驻留时有效，如果该值是0就意味着元素可以停顿无穷长的时间。
+
+    overflowToDisk ：内存不足时，是否启用磁盘缓存。
+
+    maxEntriesLocalDisk：当内存中对象数量达到maxElementsInMemory时，Ehcache将会对象写到磁盘中。
+
+    maxElementsOnDisk：硬盘最大缓存个数。
+
+    diskSpoolBufferSizeMB：这个参数设置DiskStore（磁盘缓存）的缓存区大小。默认是30MB。每个Cache都应该有自己的一个缓冲区。
+
+    diskPersistent：是否在VM重启时存储硬盘的缓存数据。默认值是false。
+
+    diskExpiryThreadIntervalSeconds：磁盘失效线程运行时间间隔，默认是120秒。
+
+    memoryStoreEvictionPolicy：当达到maxElementsInMemory限制时，Ehcache将会根据指定的策略去清理内存。默认策略是LRU。你可以设置为 FIFO或是LFU。
+        1 FIFO，先进先出
+        2 LFU，最少被使用，缓存的元素有一个hit属性，hit值最小的将会被清出缓存。
+        3 LRU，最近最少使用的，缓存的元素有一个时间戳，当缓存容量满了，而又需要腾出地方来缓存新的元素的时候，那么现有缓存元素中时间戳离当前时间最远的元素将被清出缓存。
+
+
+ehcache的知识:
+1.如果在添加Elemtent时，缓存中的Element个数达到了最大缓存数并且overflowToDisk配置的属性为true，Ehcache会更具配置项MemoryStoreEvictionPolicy的失效策略将Element输出到磁盘。如果overflowToDisk为fasle，
+  Ehcache将删除内存中Element
+2.值得注意的是缓存中失效的Element并不会别马上清理掉，所以想得到内存的真实大小应该调用方法calculateInMemorySize()方法。
+3.一个ehcache.xml对应一个CacheManager
+4.不同的缓存应该对应不同的硬盘上的路径，否则会报错
+5.注意要想使用磁盘缓存，缓存的Element必须实现序列化接口。否则会抛出NotSerializableException异常。
+6.Ehcache会将每个缓存配置的文件路径下创建一个cache_name.data文件，如果使用的磁盘持久化技术，还会生成一个cache name.index文件。
+7.Ehcache有一个后台线程专门做Ellment失效监测以及清除工作。设置线程运行间隔时间，可通过设置diskExpiryThreadIntervalSeconds属性来完成，此值不宜设置过低，否则会导致清理线程占用大量CPU资源。默认值是120秒。
+8.持久化可在Element的diskPersistent配置项中配置，如果配置为“false”或是“omitted”在CacheManager shutdown或是startup后，用来缓存Element的文件将被清除掉。如果设置为“true”，data和index文件会被保存下来，对于新创建的CacheManager Element也是可用的。
+9.使用时必须显示调用cache. Flush()才会将数据缓存到磁盘中。
+10.磁盘缓存步骤：从MemoryStore中把没有失效的Element刷新到DiskStore，Element被写入到data文件，Element将被序列化到index文件。
+11.磁盘缓存大小默认是没有限制的，不过可通过maxElementsOnDisk来指定。当磁盘缓存达到maxElementsOnDisk指定的值时，Ehcache会清理磁盘中的缓存使用默认策略是LFU（使用频率最低）。
+12.在使用完Ehcache后，必须要shutdown缓存。Ehcache中有自己的关闭机制，不过最好在你的代码中显示调用CacheManager.getInstance().shutdown();
+13.Cache:对于getValue()能取到可序列化的值；getObjectValue()取得非序列化的值
+14.cache.getSize();得到缓存中元素的个数；获得当前MemoryStore中的element数量：cache.getMemoryStoreSize();获得当前DiskStore中element数量：cache.getDiskStoreSize();
+15.CacheManager可以通过单例（factory的静态方法）或者构造函数（constructors）创建。分别叫做single model和instance model。当两种情况都有的时候，系统会采用单例模式，构造器每次都生成单例模式
+16.对于想存储数据到硬盘，或者集群时复制到其他缓存区域的数据，必须可序列化。如果不可序列化，该数据在进行上述操作时会被丢弃，且没有报错，只是在debug级别有日志信息。
+17.每一个Cachemanager应该有自己的独有的ehcache.xml配置文件。因为，当共用时，硬盘缓存路径或者监听端口将会冲突。系统也会发出警告，提醒用户配置专门的配置文件为每一个cachemanager.在分布式系统中，ehcache.xml应该配置成一样的。
+18. Ehcache有3个存储： 1）内存存储 2） 非堆存储（大内存，企业ehcache才拥有） 3） 硬盘存储（两个版本：开源的和企业级ehcache）
+19.内存存储: 其本质是使用java的LinkedHashMap来实现的。多线程安全、内存管理安全、速度快, calculateInMemorySize()可以用来计算当前ehcache内存占用大小。但生产线上不应该使用，因为这个功能效率非常低,同时，ehcache内部有一个低等级的进程，它会判断元素的是否过期。diskExpiryThreadIntervalSeconds属性可以设置该线程执行的间隔时间(默认是120秒，不能太小，以免影响效率).
+20.非堆存储: Terracotta BigMemory是一个新增的功能，它允许系统占用堆以外的内存，速度是硬盘存储的100倍，允许很大的存储空间被创建（350G被测试过）,因为非堆数据是以字节流的形式存储，所以要求Element的key和value都要是可以序列化的。因为序列化和反序列化的过程，这种存储形式比内存存储慢10倍
+21.硬盘存储:线程安全的, 当maxElementsOnDisk被设置的时候，硬盘上的存储达到限制时，LFU算法会被执行用于清除数据，只能是该算法，不可配置
+22.Persistence被设置成false或者omitted，当系统重启时，不会硬盘的数据存储在硬盘上，.data文件将会被删除.相反，.data文件不会被删除，下次重启后Cachemanager还可以使用.data文件。
+23.虚拟机被停止的时候，强烈建议调用Cachemanager.shutdown()方法。
+24.cacheEventListenerFactory - 监听缓存中element的put, remove, update和expire事件
+25.Ehcache内建了基于RMI的实现 - RMICacheReplicatorFactory

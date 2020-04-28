@@ -1,0 +1,13 @@
+在mysql的my.init的[mysqld]下添加如下配置 ：windows（linux是在my.cnf里）
+
+#开启慢查询
+slow_query_log=1
+
+#设置慢查询时间 1 s
+long_query_time=1
+
+#慢查询日志保存路径
+slow_query_log_file="D:/tmp/mysql/logs/mysql-slow.log"
+
+#开启 记录没有使用索引查询语句
+log_queries_not_using_indexes=1
